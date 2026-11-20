@@ -10,7 +10,7 @@ sys.path.insert(0, str(BACKEND_DIR))
 
 from app.db.base import Base
 from app.db.session import engine
-
+import app.models
 
 config = context.config
 
