@@ -1,11 +1,18 @@
 from fastapi import FastAPI
+
 from app.core.config.settings import settings
+from app.api.routers.workspaces import router as workspaces_router
+
 
 app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
     debug=settings.debug,
 )
+
+
+app.include_router(workspaces_router)
+
 
 @app.get("/")
 def root():
