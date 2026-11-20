@@ -1,4 +1,5 @@
 from app.models.organization import Organization
+from app.models.user import User
 from app.models.workspace import Workspace
 
-__all__ = ["Organization", "Workspace"]
+__all__ = ["Organization", "User", "Workspace"]
