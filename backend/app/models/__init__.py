@@ -1,3 +1,4 @@
+from app.models.company_profile import CompanyProfile
 from app.models.organization import Organization
 from app.models.organization_membership import OrganizationMembership
 from app.models.organization_role import OrganizationRole
@@ -7,6 +8,7 @@ from app.models.workspace_membership import WorkspaceMembership
 from app.models.workspace_role import WorkspaceRole
 
 __all__ = [
+    "CompanyProfile",
     "Organization",
     "OrganizationMembership",
     "OrganizationRole",
