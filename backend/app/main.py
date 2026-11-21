@@ -2,6 +2,7 @@ from fastapi import FastAPI
 
 from app.core.config.settings import settings
 from app.api.routers.workspaces import router as workspaces_router
+from app.api.company_profiles import router as company_profiles_router
 
 
 app = FastAPI(
@@ -12,6 +13,7 @@ app = FastAPI(
 
 
 app.include_router(workspaces_router)
+app.include_router(company_profiles_router)
 
 
 @app.get("/")
