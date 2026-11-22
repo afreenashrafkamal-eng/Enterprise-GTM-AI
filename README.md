@@ -120,3 +120,7 @@ Keep `.env` private. Git ignores it; `.env.example` is for placeholders only.
 
 Add companies manually, search by company, industry, or location, and update each company’s status as new, qualified, or disqualified.
 
+
+
+CSV imports support up to 100 companies per file using the downloadable template.
+

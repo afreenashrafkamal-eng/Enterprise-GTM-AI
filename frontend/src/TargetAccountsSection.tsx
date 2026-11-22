@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from "react";
 
 const API_URL = "http://127.0.0.1:8000";
 
@@ -34,6 +40,54 @@ const emptyForm: AccountForm = {
   notes: "",
 };
 
+function parseCsv(text: string): string[][] {
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let cell = "";
+  let insideQuotes = false;
+
+  for (let index = 0; index < text.length; index += 1) {
+    const character = text[index];
+
+    if (character === '"') {
+      if (insideQuotes && text[index + 1] === '"') {
+        cell += '"';
+        index += 1;
+      } else {
+        insideQuotes = !insideQuotes;
+      }
+    } else if (character === "," && !insideQuotes) {
+      row.push(cell.trim());
+      cell = "";
+    } else if (
+      (character === "\n" || character === "\r") &&
+      !insideQuotes
+    ) {
+      if (character === "\r" && text[index + 1] === "\n") {
+        index += 1;
+      }
+
+      row.push(cell.trim());
+      if (row.some((value) => value.length > 0)) {
+        rows.push(row);
+      }
+      row = [];
+      cell = "";
+    } else {
+      cell += character;
+    }
+  }
+
+  if (cell.length > 0 || row.length > 0) {
+    row.push(cell.trim());
+    if (row.some((value) => value.length > 0)) {
+      rows.push(row);
+    }
+  }
+
+  return rows;
+}
+
 export default function TargetAccountsSection({ organizationId }: Props) {
   const [form, setForm] = useState<AccountForm>(emptyForm);
   const [accounts, setAccounts] = useState<TargetAccount[]>([]);
@@ -41,6 +95,9 @@ export default function TargetAccountsSection({ organizationId }: Props) {
   const [statusFilter, setStatusFilter] = useState("");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [csvRows, setCsvRows] = useState<AccountForm[]>([]);
+  const [csvMessage, setCsvMessage] = useState("");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("Create a workspace to begin.");
 
@@ -62,8 +119,9 @@ export default function TargetAccountsSection({ organizationId }: Props) {
 
       if (!response.ok) {
         throw new Error(
-          Array.isArray(data) ? `The server returned ${response.status}.` :
-            data.detail ?? `The server returned ${response.status}.`,
+          Array.isArray(data)
+            ? `The server returned ${response.status}.`
+            : data.detail ?? `The server returned ${response.status}.`,
         );
       }
 
@@ -134,6 +192,149 @@ export default function TargetAccountsSection({ organizationId }: Props) {
     } finally {
       setSaving(false);
     }
+  }
+
+  async function prepareCsv(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.currentTarget.files?.[0];
+    setCsvRows([]);
+    setCsvMessage("");
+    setError("");
+
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const rows = parseCsv(text);
+
+      if (rows.length < 2) {
+        throw new Error("The CSV needs a header row and at least one company row.");
+      }
+
+      const headers = rows[0].map((header, index) =>
+        (index === 0 ? header.replace(/^\uFEFF/, "") : header)
+          .trim()
+          .toLowerCase(),
+      );
+
+      const companyNameIndex = headers.indexOf("company_name");
+      if (companyNameIndex === -1) {
+        throw new Error('The CSV must include a "company_name" column.');
+      }
+
+      const fieldIndex = (field: keyof AccountForm) => headers.indexOf(field);
+
+      const preparedRows = rows
+        .slice(1)
+        .map((values) => {
+          const valueAt = (field: keyof AccountForm) => {
+            const index = fieldIndex(field);
+            return index >= 0 ? values[index] ?? "" : "";
+          };
+
+          return {
+            company_name: valueAt("company_name"),
+            website: valueAt("website"),
+            industry: valueAt("industry"),
+            employee_range: valueAt("employee_range"),
+            location: valueAt("location"),
+            notes: valueAt("notes"),
+          };
+        })
+        .filter((account) => account.company_name.trim().length > 0);
+
+      if (preparedRows.length === 0) {
+        throw new Error("No rows with a company_name value were found.");
+      }
+
+      if (preparedRows.length > 100) {
+        throw new Error("Please import 100 companies or fewer at a time.");
+      }
+
+      setCsvRows(preparedRows);
+      setCsvMessage(
+        `${preparedRows.length} companies ready to import. Rows without a company name were skipped.`,
+      );
+    } catch (caughtError) {
+      setError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : "Could not read that CSV file.",
+      );
+    } finally {
+      event.currentTarget.value = "";
+    }
+  }
+
+  function downloadCsvTemplate() {
+    const template = [
+      "company_name,website,industry,employee_range,location,notes",
+      "Northstar Software,,Enterprise SaaS,100-500,United States,Sample target company",
+    ].join("\r\n");
+
+    const blob = new Blob([template], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "target_companies_template.csv";
+    link.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 0);
+  }
+
+  async function importCsvAccounts() {
+    if (!organizationId.trim()) {
+      setError("Create a workspace before importing target companies.");
+      return;
+    }
+
+    if (csvRows.length === 0) {
+      setError("Choose a valid CSV file before importing.");
+      return;
+    }
+
+    setImporting(true);
+    setError("");
+
+    let imported = 0;
+    let failed = 0;
+
+    for (const account of csvRows) {
+      try {
+        const response = await fetch(
+          `${API_URL}/organizations/${organizationId.trim()}/target-accounts`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              ...account,
+              company_name: account.company_name.trim(),
+              website: account.website.trim() || null,
+              industry: account.industry.trim() || null,
+              employee_range: account.employee_range.trim() || null,
+              location: account.location.trim() || null,
+              notes: account.notes.trim() || null,
+            }),
+          },
+        );
+
+        if (response.ok) {
+          imported += 1;
+        } else {
+          failed += 1;
+        }
+      } catch {
+        failed += 1;
+      }
+    }
+
+    setCsvRows([]);
+    await loadAccounts();
+
+    setCsvMessage(
+      failed === 0
+        ? `${imported} companies imported successfully.`
+        : `${imported} companies imported; ${failed} could not be imported.`,
+    );
+    setImporting(false);
   }
 
   async function changeStatus(
@@ -274,6 +475,45 @@ export default function TargetAccountsSection({ organizationId }: Props) {
           </button>
         </div>
       </form>
+
+      <div className="org-field csv-import-area">
+        <label htmlFor="target-company-csv">Import companies from CSV</label>
+        <div className="org-row">
+          <input
+            id="target-company-csv"
+            type="file"
+            accept=".csv,text/csv"
+            onChange={(event) => void prepareCsv(event)}
+          />
+          <button
+            className="load-button"
+            type="button"
+            onClick={() => void importCsvAccounts()}
+            disabled={importing || csvRows.length === 0}
+          >
+            {importing
+              ? "Importing…"
+              : `Import ${csvRows.length || ""} companies`}
+          </button>
+          <button
+            className="load-button"
+            type="button"
+            onClick={downloadCsvTemplate}
+            disabled={importing}
+          >
+            Download template
+          </button>
+        </div>
+        <span className="field-hint">
+          CSV needs a company_name column. Other supported columns: website,
+          industry, employee_range, location, notes. Up to 100 companies per import.
+        </span>
+        {csvMessage && (
+          <span className="field-hint" role="status">
+            {csvMessage}
+          </span>
+        )}
+      </div>
 
       {error && (
         <div className="research-error" role="alert">
