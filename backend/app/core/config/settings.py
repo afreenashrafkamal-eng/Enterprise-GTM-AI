@@ -1,4 +1,9 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[4]
 
 
 class Settings(BaseSettings):
@@ -7,6 +12,9 @@ class Settings(BaseSettings):
     environment: str = "development"
     debug: bool = True
 
+    openai_api_key: str = ""
+    openai_model: str = "gpt-6.2-sol"
+
     postgres_user: str = "postgres"
     postgres_password: str = ""
     postgres_host: str = "localhost"
@@ -14,7 +22,8 @@ class Settings(BaseSettings):
     postgres_db: str = "enterprise_gtm_ai"
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=PROJECT_ROOT / ".env",
+        env_file_encoding="utf-8",
         extra="ignore",
     )
 

@@ -1,8 +1,13 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config.settings import settings
 from app.api.routers.workspaces import router as workspaces_router
 from app.api.company_profiles import router as company_profiles_router
+from app.api.company_research import router as company_research_router
+from app.api.ideal_customer_profiles import (
+    router as ideal_customer_profiles_router,
+)
 
 
 app = FastAPI(
@@ -11,9 +16,21 @@ app = FastAPI(
     debug=settings.debug,
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(workspaces_router)
 app.include_router(company_profiles_router)
+app.include_router(company_research_router)
+app.include_router(ideal_customer_profiles_router)
 
 
 @app.get("/")

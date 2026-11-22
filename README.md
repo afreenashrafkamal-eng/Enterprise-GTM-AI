@@ -1,100 +1,94 @@
-﻿# Enterprise GTM AI
+﻿# \# Enterprise GTM AI
 
-AI-powered B2B Marketing, Sales, and Customer Growth Platform.
+# 
 
-## Project Vision
+# A local prototype of an AI-assisted go-to-market workspace for B2B sales teams.
 
-Build a modular, multi-tenant SaaS platform that helps B2B businesses discover prospects, research accounts, identify decision-makers, personalize outreach, manage sales activities, and grow revenue.
+# 
 
-## Phase 1: New Logo Growth Suite
+# The project is being built as a portfolio project. It is not ready for public deployment or real customer data.
 
-### Core Capabilities
-- Customer company intelligence and onboarding
-- Configurable Ideal Customer Profiles (ICP)
-- Multi-industry B2B targeting
-- Geographic targeting
-- Target account discovery
-- Account qualification and scoring
-- Evidence-based company research
-- Contact and decision-maker intelligence
-- AI-assisted personalized outreach
-- Email campaigns and follow-ups
-- Reply classification and management
-- Lightweight CRM and pipeline
-- Human Cloud Dialer
-- Analytics and usage tracking
+# 
 
-### Human Cloud Dialer
-- Human click-to-call
-- Calling queues
-- AI-assisted call preparation
-- Call notes and dispositions
-- Callback reminders
-- Call history
-- CRM activity logging
-- International local caller ID where supported and legally permitted
-- Country-based caller ID selection
-- Authorized local number provisioning
-- Configurable fallback caller ID
-- Transparent telephony usage and costs
+# \## What works now
 
-## Supported Industries
+# 
 
-- Enterprise software
-- ERP, CRM, HRMS, SCM, and procurement software
-- Cybersecurity and IT services
-- Cloud, infrastructure, data, and AI
-- Staffing and recruitment agencies
-- Professional services and consulting
-- Manufacturing and industrial businesses
-- Distributors and system integrators
-- Other configurable B2B categories
+# \- Company profile onboarding with load, create, and update.
 
-## Technology Stack
+# \- AI-assisted company research with suggestions for the profile.
 
-- Frontend: React + TypeScript
-- Backend: Python + FastAPI
-- Database: PostgreSQL
-- ORM: SQLAlchemy
-- Database migrations: Alembic
-- Version control: Git
+# \- Review and apply research suggestions.
 
-## Architecture Principles
+# \- Ideal Customer Profile (ICP) onboarding with saved targeting details.
 
-- Modular monolith initially
-- Multi-tenant architecture
-- Provider-independent integrations
-- Security and privacy by design
-- Evidence-based AI research
-- Human approval for important actions
-- Cost controls and usage tracking
-- Compliance-aware outreach
-- Progressive research to control costs
-- Automated testing and Git checkpoints
+# \- FastAPI backend, PostgreSQL database, and Alembic migrations.
 
-## Development Scope
+# \- React and TypeScript frontend.
 
-Phase 1 focuses on the New Logo Growth Suite.
+# 
 
-Future suites:
+# \## Technology
 
-- Customer Retention & Expansion
-- Inbound Demand Generation
-- Revenue Growth Suite
+# 
 
-Future capabilities must not compromise the Phase 1 scope.
+# \- Frontend: React, TypeScript, and Vite
 
-## Development Environment
+# \- Backend: Python and FastAPI
 
-- Windows 11
-- Visual Studio Code
-- Python
-- Node.js and npm
-- Git
-- PostgreSQL
+# \- Database: PostgreSQL
 
-## Project Status
+# \- ORM: SQLAlchemy
 
-- Environment setup: In progress
-- Project foundation: In progress
-- Application development: Not started
+# \- Database migrations: Alembic
+
+# \- AI research: OpenAI API
+
+# 
+
+# \## Run locally on Windows
+
+# 
+
+# \### Requirements
+
+# 
+
+# \- Python
+
+# \- Node.js and npm
+
+# \- PostgreSQL
+
+# \- The project’s `.venv` virtual environment
+
+# 
+
+# \### Configure local settings
+
+# 
+
+# The project uses a `.env` file in the project root. Configure the PostgreSQL settings and, if using AI research, your OpenAI API key there.
+
+# 
+
+# Never commit `.env` or share your API key. The repository’s `.gitignore` excludes `.env`.
+
+# 
+
+# \### Start the backend
+
+# 
+
+# Open a PowerShell window and run:
+
+# 
+
+# ```powershell
+
+# Set-Location C:\\Enterprise-GTM-AI
+
+# .\\.venv\\Scripts\\python.exe -m alembic -c .\\alembic.ini upgrade head
+
+# .\\.venv\\Scripts\\python.exe -m uvicorn app.main:app --app-dir backend --reload
+
