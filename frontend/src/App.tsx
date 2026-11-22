@@ -6,9 +6,10 @@ import {
 } from "react";
 import "./App.css";
 import IcpSection from "./IcpSection";
+import OrganizationSetup from "./OrganizationSetup";
 
 const API_URL = "http://127.0.0.1:8000";
-const DEFAULT_ORGANIZATION_ID = "1aa01042-099a-4dcd-915e-8e4f29a368f9";
+const ORGANIZATION_STORAGE_KEY = "enterprise-gtm-organization-id";
 
 type ProfileForm = {
   website: string;
@@ -40,12 +41,14 @@ const emptyForm: ProfileForm = {
 };
 
 function App() {
-  const [organizationId, setOrganizationId] = useState(DEFAULT_ORGANIZATION_ID);
+  const [organizationId, setOrganizationId] = useState(
+    () => localStorage.getItem(ORGANIZATION_STORAGE_KEY) ?? "",
+  );
   const [form, setForm] = useState<ProfileForm>(emptyForm);
   const [profileId, setProfileId] = useState("");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [notice, setNotice] = useState("Loading your company profile…");
+  const [notice, setNotice] = useState("Create or load a workspace to begin.");
   const [researching, setResearching] = useState(false);
   const [researchError, setResearchError] = useState("");
   const [researchResult, setResearchResult] = useState<ResearchResult | null>(
@@ -54,7 +57,7 @@ function App() {
 
   const loadProfile = useCallback(async () => {
     if (!organizationId.trim()) {
-      setNotice("Enter an organization ID to load a profile.");
+      setNotice("Create a workspace or enter an organization ID to load a profile.");
       return;
     }
 
@@ -108,7 +111,7 @@ function App() {
 
   async function researchCompany() {
     if (!organizationId.trim()) {
-      setResearchError("Enter an organization ID before starting research.");
+      setResearchError("Create a workspace or enter an organization ID first.");
       return;
     }
 
@@ -153,7 +156,7 @@ function App() {
     event.preventDefault();
 
     if (!organizationId.trim()) {
-      setNotice("Enter an organization ID before saving.");
+      setNotice("Create a workspace or enter an organization ID before saving.");
       return;
     }
 
@@ -190,6 +193,16 @@ function App() {
 
   function scrollToSection(id: string) {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  }
+
+  function handleOrganizationIdChange(value: string) {
+    setOrganizationId(value);
+
+    if (value.trim()) {
+      localStorage.setItem(ORGANIZATION_STORAGE_KEY, value.trim());
+    } else {
+      localStorage.removeItem(ORGANIZATION_STORAGE_KEY);
+    }
   }
 
   return (
@@ -278,14 +291,18 @@ function App() {
               </span>
             </div>
 
+            <OrganizationSetup />
+
             <div className="org-field">
               <label htmlFor="organizationId">Organization ID</label>
               <div className="org-row">
                 <input
                   id="organizationId"
                   value={organizationId}
-                  onChange={(event) => setOrganizationId(event.target.value)}
-                  placeholder="Paste your organization ID"
+                  onChange={(event) =>
+                    handleOrganizationIdChange(event.target.value)
+                  }
+                  placeholder="Create a workspace or paste an organization ID"
                 />
                 <button
                   className="load-button"
@@ -458,7 +475,9 @@ function App() {
               </div>
 
               <div className="form-footer">
-                <p className="notice" role="status">{notice}</p>
+                <p className="notice" role="status">
+                  {notice}
+                </p>
                 <button className="save-button" type="submit" disabled={saving}>
                   {saving ? "Saving…" : "Save company profile"}
                   {!saving && <span>→</span>}

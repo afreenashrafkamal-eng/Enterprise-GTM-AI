@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config.settings import settings
 from app.api.routers.workspaces import router as workspaces_router
+from app.api.organizations import router as organizations_router
 from app.api.company_profiles import router as company_profiles_router
 from app.api.company_research import router as company_research_router
 from app.api.ideal_customer_profiles import (
@@ -21,6 +22,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "http://127.0.0.1:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5174",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -28,6 +31,7 @@ app.add_middleware(
 )
 
 app.include_router(workspaces_router)
+app.include_router(organizations_router)
 app.include_router(company_profiles_router)
 app.include_router(company_research_router)
 app.include_router(ideal_customer_profiles_router)
