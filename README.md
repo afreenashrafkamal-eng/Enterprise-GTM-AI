@@ -98,3 +98,17 @@
 
 !\[Ideal Customer Profile screen](docs/ideal-customer-profile.png)
 
+\## Local environment setup
+
+
+
+1\. Copy `.env.example` to `.env`.
+
+2\. Set your local PostgreSQL values in `.env`.
+
+3\. To use AI research, add your OpenAI API key to `OPENAI\_API\_KEY` in `.env`.
+
+
+
+Keep `.env` private. Git ignores it; `.env.example` is for placeholders only.
+
