@@ -92,3 +92,9 @@
 
 # .\\.venv\\Scripts\\python.exe -m uvicorn app.main:app --app-dir backend --reload
 
+\## Application screenshot
+
+
+
+!\[Ideal Customer Profile screen](docs/ideal-customer-profile.png)
+
