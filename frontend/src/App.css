@@ -527,6 +527,7 @@ textarea:focus {
     width: 100%;
   }
 }
+
 .research-nav {
   width: 100%;
   border: 0;
@@ -728,5 +729,131 @@ textarea:focus {
   .suggestion-item {
     grid-template-columns: 1fr;
     gap: 4px;
+  }
+}
+
+.target-accounts-section {
+  margin-top: 24px;
+  overflow: hidden;
+}
+
+.target-account-form {
+  padding: 22px 28px 0;
+}
+
+.target-account-form .form-grid {
+  padding: 0;
+}
+
+.target-account-form .form-footer {
+  margin: 18px -28px 0;
+}
+
+.target-account-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 210px;
+  gap: 12px;
+  padding: 8px 32px 20px;
+}
+
+.target-account-toolbar input,
+.target-account-toolbar select,
+.target-account-row select {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid #d9e2e7;
+  border-radius: 10px;
+  background: #fff;
+  color: #1b2934;
+  font: inherit;
+}
+
+.target-account-list {
+  display: grid;
+  gap: 12px;
+  padding: 0 32px 28px;
+}
+
+.target-account-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px;
+  border: 1px solid #e0e7eb;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.target-account-details {
+  min-width: 0;
+}
+
+.target-account-details h3 {
+  margin: 0 0 6px;
+  color: #1b2934;
+  font-size: 17px;
+}
+
+.target-account-details p {
+  margin: 4px 0;
+  color: #718195;
+  line-height: 1.5;
+}
+
+.target-account-details span {
+  display: inline-block;
+  margin-top: 4px;
+  color: #117569;
+  font-size: 14px;
+}
+
+.target-account-row select {
+  max-width: 180px;
+}
+
+.target-account-empty {
+  margin: 0;
+  padding: 12px 32px 28px;
+  color: #718195;
+}
+
+.organization-error {
+  margin: 12px 0;
+  color: #b42318;
+}
+
+@media (max-width: 700px) {
+  .target-account-form {
+    padding: 18px 18px 0;
+  }
+
+  .target-account-form .form-footer {
+    margin-right: -18px;
+    margin-left: -18px;
+  }
+
+  .target-account-toolbar {
+    grid-template-columns: 1fr;
+    padding: 8px 18px 18px;
+  }
+
+  .target-account-list {
+    padding: 0 18px 20px;
+  }
+
+  .target-account-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .target-account-row select {
+    max-width: none;
+  }
+
+  .target-account-empty {
+    padding-right: 18px;
+    padding-left: 18px;
   }
 }

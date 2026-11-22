@@ -112,3 +112,11 @@
 
 Keep `.env` private. Git ignores it; `.env.example` is for placeholders only.
 
+
+
+\## Target companies
+
+
+
+Add companies manually, search by company, industry, or location, and update each company’s status as new, qualified, or disqualified.
+

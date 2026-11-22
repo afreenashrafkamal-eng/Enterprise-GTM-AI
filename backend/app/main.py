@@ -9,6 +9,7 @@ from app.api.company_research import router as company_research_router
 from app.api.ideal_customer_profiles import (
     router as ideal_customer_profiles_router,
 )
+from app.api.target_accounts import router as target_accounts_router
 
 
 app = FastAPI(
@@ -35,6 +36,7 @@ app.include_router(organizations_router)
 app.include_router(company_profiles_router)
 app.include_router(company_research_router)
 app.include_router(ideal_customer_profiles_router)
+app.include_router(target_accounts_router)
 
 
 @app.get("/")
