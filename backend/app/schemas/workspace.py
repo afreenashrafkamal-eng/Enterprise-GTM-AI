@@ -4,6 +4,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class WorkspaceCreate(BaseModel):
+    organization_id: str = Field(min_length=36, max_length=36)
     name: str = Field(min_length=1, max_length=200)
     slug: str = Field(
         min_length=3,
@@ -14,6 +15,7 @@ class WorkspaceCreate(BaseModel):
 
 class WorkspaceResponse(BaseModel):
     id: str
+    organization_id: str
     name: str
     slug: str
     created_at: datetime

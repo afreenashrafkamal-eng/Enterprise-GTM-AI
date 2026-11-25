@@ -4,6 +4,7 @@ from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, ConfigDict, Field
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db.session import SessionLocal
@@ -39,7 +40,18 @@ def get_db():
         db.close()
 
 
-@router.post("", response_model=OrganizationResponse, status_code=status.HTTP_201_CREATED)
+@router.get("", response_model=list[OrganizationResponse])
+def list_organizations(db: Session = Depends(get_db)):
+    return db.scalars(
+        select(Organization).order_by(Organization.created_at.desc())
+    ).all()
+
+
+@router.post(
+    "",
+    response_model=OrganizationResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 def create_organization(
     data: OrganizationCreate,
     db: Session = Depends(get_db),

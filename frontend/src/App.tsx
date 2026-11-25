@@ -8,6 +8,7 @@ import "./App.css";
 import IcpSection from "./IcpSection";
 import OrganizationSetup from "./OrganizationSetup";
 import TargetAccountsSection from "./TargetAccountsSection";
+import TargetContactsSection from "./TargetContactsSection";
 
 const API_URL = "http://127.0.0.1:8000";
 const ORGANIZATION_STORAGE_KEY = "enterprise-gtm-organization-id";
@@ -255,6 +256,15 @@ function App() {
           Target companies
         </button>
 
+        <button
+          className="nav-item research-nav"
+          type="button"
+          onClick={() => scrollToSection("decision-makers")}
+        >
+          <span className="nav-icon">◎</span>
+          Decision-makers
+        </button>
+
         <div className="sidebar-bottom">
           <div className="status-dot" />
           <span>Local development</span>
@@ -498,6 +508,7 @@ function App() {
 
           <IcpSection organizationId={organizationId} />
           <TargetAccountsSection organizationId={organizationId} />
+          <TargetContactsSection organizationId={organizationId} />
 
           <p className="privacy-note">
             Your profiles are saved to your local development database.
