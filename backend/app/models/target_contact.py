@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from uuid import uuid4
 
 from sqlalchemy import (
+    Boolean,
     CheckConstraint,
     DateTime,
     ForeignKey,
@@ -64,6 +65,13 @@ class TargetContact(Base):
         String(20),
         default="new",
         server_default="new",
+        nullable=False,
+    )
+
+    do_not_contact: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        server_default="false",
         nullable=False,
     )
 

@@ -9,11 +9,16 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.api.company_profiles import get_db
+from app.api.dependencies import require_organization_access
 from app.core.config.settings import settings
 from app.models.company_profile import CompanyProfile
 
 
-router = APIRouter(prefix="/organizations", tags=["Company Research"])
+router = APIRouter(
+    prefix="/organizations",
+    tags=["Company Research"],
+    dependencies=[Depends(require_organization_access)],
+)
 
 
 class ResearchSource(BaseModel):

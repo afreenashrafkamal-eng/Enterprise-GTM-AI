@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
-
-const API_URL = "http://127.0.0.1:8000";
+import { apiFetch, API_URL } from "./api";
 const ORGANIZATION_STORAGE_KEY = "enterprise-gtm-organization-id";
+const LOCAL_TEST_WORKSPACES = new Set(["micro1", "SummitOps Cloud", "Northstar ERP"]);
 
 type Organization = {
   id: string;
@@ -20,6 +20,8 @@ export default function OrganizationSetup() {
   const [name, setName] = useState("");
   const [loadingClients, setLoadingClients] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState("");
+  const [deleteNotice, setDeleteNotice] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -27,7 +29,7 @@ export default function OrganizationSetup() {
 
     async function loadOrganizations() {
       try {
-        const response = await fetch(`${API_URL}/organizations`);
+        const response = await apiFetch(`${API_URL}/organizations`);
         const data = await response.json().catch(() => []);
 
         if (!response.ok) {
@@ -77,19 +79,19 @@ export default function OrganizationSetup() {
     event.preventDefault();
     setError("");
 
-    const clientName = name.trim();
-    if (!clientName) {
-      setError("Enter a client name.");
+    const workspaceName = name.trim();
+    if (!workspaceName) {
+      setError("Enter a workspace name.");
       return;
     }
 
     setSaving(true);
 
     try {
-      const response = await fetch(`${API_URL}/organizations`, {
+      const response = await apiFetch(`${API_URL}/organizations`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: clientName }),
+        body: JSON.stringify({ name: workspaceName }),
       });
 
       const data = (await response.json().catch(() => ({}))) as
@@ -121,17 +123,53 @@ export default function OrganizationSetup() {
     }
   }
 
+  async function deleteTestWorkspace(organization: Organization) {
+    const accepted = window.confirm(
+      `Permanently delete the test workspace “${organization.name}” and its saved profiles, prospects, contacts, research, call/email history, and integrations? My Agency and the other retained workspaces will be kept. This cannot be undone.`,
+    );
+    if (!accepted) return;
+
+    setError("");
+    setDeleteNotice("");
+    setDeletingId(organization.id);
+    try {
+      const response = await apiFetch(`${API_URL}/organizations/${encodeURIComponent(organization.id)}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirm_name: organization.name }),
+      });
+      if (!response.ok) {
+        const data = (await response.json().catch(() => ({}))) as ApiError;
+        throw new Error(data.detail ?? `The server returned ${response.status}.`);
+      }
+
+      setOrganizations((current) => current.filter((item) => item.id !== organization.id));
+      setDeleteNotice(`${organization.name} and its linked workspace data were deleted.`);
+      if (localStorage.getItem(ORGANIZATION_STORAGE_KEY) === organization.id) {
+        const agency = organizations.find((item) => item.name === "My Agency" && item.id !== organization.id);
+        const nextId = agency?.id ?? organizations.find((item) => item.id !== organization.id)?.id ?? "";
+        if (nextId) localStorage.setItem(ORGANIZATION_STORAGE_KEY, nextId);
+        else localStorage.removeItem(ORGANIZATION_STORAGE_KEY);
+        setSelectedId(nextId);
+      }
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : "Could not remove that test workspace.");
+    } finally {
+      setDeletingId("");
+    }
+  }
+
   return (
     <section className="form-card organization-setup">
       <div className="card-heading">
         <div>
-          <h2>Clients</h2>
-          <p>Select a client or add a new one to manage its outbound work.</p>
+          <h2>Agency and client workspaces</h2>
+          <p>Choose your own agency workspace or a client workspace before researching or contacting prospects.</p>
         </div>
       </div>
 
       <div className="org-field">
-        <label htmlFor="clientOrganization">Current client</label>
+        <label htmlFor="clientOrganization">Active workspace</label>
         <select
           id="clientOrganization"
           value={selectedId}
@@ -159,15 +197,34 @@ export default function OrganizationSetup() {
         </select>
       </div>
 
+      {organizations.some((organization) => LOCAL_TEST_WORKSPACES.has(organization.name)) && (
+        <div className="org-field workspace-cleanup">
+          <strong>Remove test workspaces</strong>
+          <p>Only the three identified demo workspaces can be removed here. Their linked workspace data is permanently deleted.</p>
+          <div className="workspace-cleanup-list">
+            {organizations.filter((organization) => LOCAL_TEST_WORKSPACES.has(organization.name)).map((organization) => (
+              <div className="workspace-cleanup-row" key={organization.id}>
+                <span>{organization.name}</span>
+                <button type="button" className="workspace-delete-button" disabled={Boolean(deletingId)} onClick={() => void deleteTestWorkspace(organization)}>
+                  {deletingId === organization.id ? "Deleting…" : "Delete"}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {deleteNotice && <p className="workspace-delete-notice" role="status">{deleteNotice}</p>}
+
       <form className="form-body" onSubmit={createClient}>
         <div className="field full-width">
-          <label htmlFor="clientName">Add a client</label>
+          <label htmlFor="clientName">Add an agency or client workspace</label>
           <input
             id="clientName"
             value={name}
             onChange={(event) => setName(event.target.value)}
             maxLength={200}
-            placeholder="e.g. Northstar ERP"
+            placeholder="e.g. My Agency or Northstar ERP"
             required
           />
         </div>
@@ -180,11 +237,10 @@ export default function OrganizationSetup() {
 
         <div className="form-footer">
           <span className="field-hint">
-            Each client’s profile, ICP, and target companies stay under its own
-            organization.
+            Keep your agency work separate from every client’s profile, ICP, and prospect list.
           </span>
           <button className="save-button" type="submit" disabled={saving}>
-            {saving ? "Adding…" : "Add client"}
+            {saving ? "Adding…" : "Add workspace"}
           </button>
         </div>
       </form>

@@ -71,6 +71,16 @@ class TargetAccount(Base):
         nullable=True,
     )
 
+    outreach_reason: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
+    evidence_url: Mapped[str | None] = mapped_column(
+        String(2000),
+        nullable=True,
+    )
+
     qualification_status: Mapped[str] = mapped_column(
         String(20),
         default="new",

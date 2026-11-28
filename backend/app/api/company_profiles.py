@@ -3,6 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db.session import SessionLocal
+from app.api.dependencies import require_organization_access
 from app.models.company_profile import CompanyProfile
 from app.models.organization import Organization
 from app.schemas.company_profile import (
@@ -11,7 +12,11 @@ from app.schemas.company_profile import (
     CompanyProfileResponse,
 )
 
-router = APIRouter(prefix="/organizations", tags=["Company Profile"])
+router = APIRouter(
+    prefix="/organizations",
+    tags=["Company Profile"],
+    dependencies=[Depends(require_organization_access)],
+)
 
 
 def get_db():

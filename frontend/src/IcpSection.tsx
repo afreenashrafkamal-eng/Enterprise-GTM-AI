@@ -4,8 +4,7 @@ import {
   useState,
   type FormEvent,
 } from "react";
-
-const API_URL = "http://127.0.0.1:8000";
+import { apiFetch, API_URL } from "./api";
 
 type IcpForm = {
   industries: string;
@@ -47,7 +46,7 @@ export default function IcpSection({ organizationId }: Props) {
     setLoading(true);
 
     try {
-      const response = await fetch(
+      const response = await apiFetch(
         `${API_URL}/organizations/${organizationId.trim()}/ideal-customer-profile`,
       );
 
@@ -105,7 +104,7 @@ export default function IcpSection({ organizationId }: Props) {
     setMessage("Saving ideal customer profile…");
 
     try {
-      const response = await fetch(
+      const response = await apiFetch(
         `${API_URL}/organizations/${organizationId.trim()}/ideal-customer-profile`,
         {
           method: profileId ? "PUT" : "POST",

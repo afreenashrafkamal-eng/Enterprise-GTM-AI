@@ -3,6 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db.session import SessionLocal
+from app.api.dependencies import require_organization_access
 from app.models.organization import Organization
 from app.models.target_account import TargetAccount
 from app.models.target_contact import TargetContact
@@ -13,7 +14,10 @@ from app.schemas.target_contact import (
 )
 
 
-router = APIRouter(tags=["Target Contacts"])
+router = APIRouter(
+    tags=["Target Contacts"],
+    dependencies=[Depends(require_organization_access)],
+)
 
 
 def get_db():
@@ -108,6 +112,9 @@ def create_target_contact(
         phone=data.phone.strip() or None if data.phone else None,
         linkedin_url=data.linkedin_url.strip() or None if data.linkedin_url else None,
         source_url=data.source_url.strip() or None if data.source_url else None,
+        email_status=data.email_status,
+        qualification_status=data.qualification_status,
+        do_not_contact=data.do_not_contact,
     )
 
     db.add(contact)

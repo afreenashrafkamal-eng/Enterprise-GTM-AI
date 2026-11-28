@@ -3,6 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.api.company_profiles import get_db, get_organization
+from app.api.dependencies import require_organization_access
 from app.models.ideal_customer_profile import IdealCustomerProfile
 from app.schemas.ideal_customer_profile import (
     IdealCustomerProfileCreate,
@@ -11,7 +12,11 @@ from app.schemas.ideal_customer_profile import (
 )
 
 
-router = APIRouter(prefix="/organizations", tags=["Ideal Customer Profile"])
+router = APIRouter(
+    prefix="/organizations",
+    tags=["Ideal Customer Profile"],
+    dependencies=[Depends(require_organization_access)],
+)
 
 
 @router.post(

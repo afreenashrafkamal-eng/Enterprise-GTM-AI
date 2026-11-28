@@ -3,6 +3,7 @@ from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
 from app.db.session import SessionLocal
+from app.api.dependencies import require_organization_access
 from app.models.organization import Organization
 from app.models.target_account import TargetAccount
 from app.schemas.target_account import (
@@ -13,7 +14,10 @@ from app.schemas.target_account import (
 )
 
 
-router = APIRouter(tags=["Target Accounts"])
+router = APIRouter(
+    tags=["Target Accounts"],
+    dependencies=[Depends(require_organization_access)],
+)
 
 
 def get_db():
@@ -107,6 +111,8 @@ def create_target_account(
         employee_range=data.employee_range,
         location=data.location,
         notes=data.notes,
+        outreach_reason=data.outreach_reason,
+        evidence_url=data.evidence_url,
     )
 
     db.add(account)

@@ -16,6 +16,9 @@ class TargetContactCreate(BaseModel):
     phone: str | None = Field(default=None, max_length=50)
     linkedin_url: str | None = Field(default=None, max_length=500)
     source_url: str | None = Field(default=None, max_length=1000)
+    email_status: EmailStatus = "not_checked"
+    qualification_status: QualificationStatus = "new"
+    do_not_contact: bool = False
 
 
 class TargetContactUpdate(BaseModel):
@@ -28,6 +31,7 @@ class TargetContactUpdate(BaseModel):
     source_url: str | None = Field(default=None, max_length=1000)
     email_status: EmailStatus | None = None
     qualification_status: QualificationStatus | None = None
+    do_not_contact: bool | None = None
 
 
 class TargetContactResponse(BaseModel):
@@ -42,6 +46,7 @@ class TargetContactResponse(BaseModel):
     source_url: str | None
     email_status: EmailStatus
     qualification_status: QualificationStatus
+    do_not_contact: bool
     created_at: datetime
     updated_at: datetime
 
